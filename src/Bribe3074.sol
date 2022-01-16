@@ -2,68 +2,27 @@
 
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
-library Signature {
-    function hashEthSignedMessage(bytes32 messageHash)
-        private
-        pure
-        returns (bytes32)
-    {
-        return
-            keccak256(
-                abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash)
-            );
-    }
-
-    function recoverSigner(bytes32 messageHash, bytes memory signature)
-        internal
-        pure
-        returns (address)
-    {
-        (bytes32 r, bytes32 s, uint8 v) = splitSignature(signature);
-
-        return ecrecover(hashEthSignedMessage(messageHash), v, r, s);
-    }
-
-    function splitSignature(bytes memory sig)
-        private
-        pure
-        returns (
-            bytes32 r,
-            bytes32 s,
-            uint8 v
-        )
-    {
-        require(sig.length == 65);
-
-        assembly {
-            /*
-            First 32 bytes stores the length of the signature
-
-            add(sig, 32) = pointer of sig + 32
-            effectively, skips first 32 bytes of signature
-
-            mload(p) loads next 32 bytes starting at the memory address p into memory
-            */
-
-            // first 32 bytes, after the length prefix
-            r := mload(add(sig, 32))
-            // second 32 bytes
-            s := mload(add(sig, 64))
-            // final byte (first byte of the next 32 bytes)
-            v := byte(0, mload(add(sig, 96)))
-        }
-
-        // implicitly return (r, s, v)
-    }
-}
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 interface DoTheThing {
     function doTheThing(bytes memory extraData) external;
 }
 
+library Errors {
+    string constant internal INVALID_SIGNATURE = "bad sig";
+    string constant internal REENTER = "reenter";
+    string constant internal NOT_ENTERED = "unentered";
+    string constant internal INVALID_DOER = "bad doer";
+    string constant internal NOT_JUDGED = "unjudged";
+    string constant internal FAILED = "wen 3074";
+    string constant internal LOCKED = "locked";
+}
+
 contract Bribe3074 {
+    using SafeERC20 for IERC20;
+
     enum State {
         Null,
         Locked,
@@ -93,6 +52,20 @@ contract Bribe3074 {
         return keccak256(abi.encodePacked(hashMessage1()));
     }
 
+    function verifySignature(
+        bytes32 messageHash,
+        bytes memory signature
+    )
+        private
+        view
+    {
+        address recovered = ECDSA.recover(
+            ECDSA.toEthSignedMessageHash(messageHash),
+            signature
+        );
+        require(tx.origin == recovered, Errors.INVALID_SIGNATURE);
+    }
+
     function release(
         bytes memory signature1,
         bytes memory signature2,
@@ -101,34 +74,31 @@ contract Bribe3074 {
     )
         external
     {
-        require(State.Locked == sState);    // Prevent unwanted re-entrancy.
-        sState = State.Trial;               // Mark as having entered.
+        require(State.Locked == sState, Errors.REENTER);    // Prevent unwanted re-entrancy.
+        sState = State.Trial;                               // Mark as having entered.
 
         // Prove `tx.origin` is a normal EOA by having it sign two different
         // messages.
-        address signer1 = Signature.recoverSigner(hashMessage1(), signature1);
-        require(tx.origin == signer1);
-
-        address signer2 = Signature.recoverSigner(hashMessage2(), signature2);
-        require(tx.origin == signer2);
+        verifySignature(hashMessage1(), signature1);
+        verifySignature(hashMessage2(), signature2);
 
         // Call into an arbitrary contract that does the 3074 magic, and calls
         // back into this contract's `judge`.
-        require(address(doer) != address(this));
+        require(address(doer) != address(this), Errors.INVALID_DOER);
         doer.doTheThing(extraData);
 
         // Revert in the case where `judge` is never called.
-        require(State.Unlocked == sState);
+        require(State.Unlocked == sState, Errors.NOT_JUDGED);
     }
 
     function judge() external {
         // Only possible if 3074 is implemented, or we're in the top level of
         // execution.
-        require(msg.sender == tx.origin);
+        require(msg.sender == tx.origin, Errors.FAILED);
 
         // Require that we've been called earlier in this call stack, excluding
         // the possibility we're in the top level of execution.
-        require(State.Trial == sState);
+        require(State.Trial == sState, Errors.NOT_ENTERED);
 
         // Unlock claims!
         sState = State.Unlocked;
@@ -136,12 +106,11 @@ contract Bribe3074 {
     }
 
     function fund(IERC20 token, address recipient, uint256 amount) external {
-        require(State.Locked == sState);
+        require(State.Locked == sState, Errors.LOCKED);
 
         sBalances[token][recipient] += amount;
         emit Funded(msg.sender, recipient, token, amount);
-        bool success = token.transferFrom(msg.sender, address(this), amount);
-        require(success);
+        token.safeTransferFrom(msg.sender, address(this), amount);
     }
 
     function claim(IERC20 token) external {
@@ -149,22 +118,20 @@ contract Bribe3074 {
     }
 
     function claimFor(IERC20 token, address recipient) public {
-        require(State.Unlocked == sState);
+        require(State.Unlocked == sState, Errors.LOCKED);
         uint256 amount = sBalances[token][recipient];
         sBalances[token][recipient] = 0;
-        bool success = token.transfer(recipient, amount);
-        require(success);
+        token.safeTransfer(recipient, amount);
     }
 
     function approveFor(IERC20 token, address recipient) external {
-        require(State.Unlocked == sState);
+        require(State.Unlocked == sState, Errors.LOCKED);
 
         uint256 amount = sBalances[token][recipient];
         require(amount > 0);
 
         sBalances[token][recipient] = 0;
 
-        bool success = token.approve(recipient, amount);
-        require(success);
+        token.safeApprove(recipient, amount);
     }
 }

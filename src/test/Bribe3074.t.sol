@@ -3,7 +3,7 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-import "@std/stdlib.sol";
+import {Vm} from "@std/Vm.sol";
 
 import "../Bribe3074.sol";
 
@@ -147,7 +147,8 @@ contract Bribe3074Test is DSTest {
 
         try bribe.release(SIG_1, SIG_2, leaveSender, hex"") {
             fail();
-        } catch {
+        } catch Error(string memory reason) {
+            assertEq(reason, Errors.FAILED);
         }
 
         assertTrue(bribe.locked());
@@ -160,7 +161,8 @@ contract Bribe3074Test is DSTest {
 
         try bribe.release(SIG_2, SIG_2, setSender, hex"") {
             fail();
-        } catch {
+        } catch Error(string memory reason) {
+            assertEq(reason, Errors.INVALID_SIGNATURE);
         }
 
         assertTrue(bribe.locked());
@@ -173,7 +175,8 @@ contract Bribe3074Test is DSTest {
 
         try bribe.release(SIG_1, SIG_1, setSender, hex"") {
             fail();
-        } catch {
+        } catch Error(string memory reason) {
+            assertEq(reason, Errors.INVALID_SIGNATURE);
         }
 
         assertTrue(bribe.locked());
@@ -184,7 +187,8 @@ contract Bribe3074Test is DSTest {
 
         try bribe.judge() {
             fail();
-        } catch {
+        } catch Error(string memory reason) {
+            assertEq(reason, Errors.FAILED);
         }
 
         assertTrue(bribe.locked());
@@ -270,7 +274,8 @@ contract Bribe3074Test is DSTest {
 
         try bribe.claim(tokenA) {
             fail();
-        } catch {
+        } catch Error(string memory reason) {
+            assertEq(reason, Errors.LOCKED);
         }
 
         assertEq(tokenA.balanceOf(self), type(uint256).max - 17);
@@ -359,7 +364,8 @@ contract Bribe3074Test is DSTest {
 
         try bribe.approveFor(tokenA, APPROVEE) {
             fail();
-        } catch {
+        } catch Error(string memory reason) {
+            assertEq(reason, Errors.LOCKED);
         }
 
         assertEq(tokenA.balanceOf(self), type(uint256).max - 17);
