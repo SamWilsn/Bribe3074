@@ -10,9 +10,22 @@ import "../Bribe3074.sol";
 import "ds-test/test.sol";
 
 address constant APPROVEE = 0x5555555555555555555555555555555555555555;
-address constant ORIGIN = 0x285608733D47720B40447b1cC0293A2e4435090e;
+address constant ORIGIN = 0xfefeFEFeFEFEFEFEFeFefefefefeFEfEfefefEfe;
+address constant SIGNER = 0x285608733D47720B40447b1cC0293A2e4435090e;
 
 Vm constant VM = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
+
+function splitSignatures(
+    bytes calldata sigs
+)
+    returns (
+        bytes memory sig1,
+        bytes memory sig2
+    )
+{
+    sig1 = sigs[:65];
+    sig2 = sigs[65:];
+}
 
 contract FakeToken is ERC20 {
     constructor(string memory name, string memory symbol) ERC20(name, symbol) {
@@ -27,11 +40,13 @@ contract SetSenderAndClaim is DoTheThing {
         TOKEN = token;
     }
 
-    function doTheThing(bytes calldata) external {
+    function doTheThing(bytes calldata sigs) external {
         Bribe3074 bribe = Bribe3074(msg.sender);
 
-        VM.prank(ORIGIN, ORIGIN);
-        bribe.judge();
+        (bytes memory sig1, bytes memory sig2) = splitSignatures(sigs);
+
+        VM.prank(SIGNER, ORIGIN);
+        bribe.judge(sig1, sig2);
 
         bribe.claim(TOKEN);
     }
@@ -44,26 +59,30 @@ contract SetSenderAndApprove is DoTheThing {
         TOKEN = token;
     }
 
-    function doTheThing(bytes calldata) external {
+    function doTheThing(bytes calldata sigs) external {
         Bribe3074 bribe = Bribe3074(msg.sender);
 
-        VM.prank(ORIGIN, ORIGIN);
-        bribe.judge();
+        (bytes memory sig1, bytes memory sig2) = splitSignatures(sigs);
+
+        VM.prank(SIGNER, ORIGIN);
+        bribe.judge(sig1, sig2);
 
         bribe.approveFor(TOKEN, APPROVEE);
     }
 }
 
 contract SetSender is DoTheThing {
-    function doTheThing(bytes calldata) external {
-        VM.prank(ORIGIN, ORIGIN);
-        Bribe3074(msg.sender).judge();
+    function doTheThing(bytes calldata sigs) external {
+        VM.prank(SIGNER, ORIGIN);
+        (bytes memory sig1, bytes memory sig2) = splitSignatures(sigs);
+        Bribe3074(msg.sender).judge(sig1, sig2);
     }
 }
 
 contract LeaveSender is DoTheThing {
-    function doTheThing(bytes calldata) external {
-        Bribe3074(msg.sender).judge();
+    function doTheThing(bytes calldata sigs) external {
+        (bytes memory sig1, bytes memory sig2) = splitSignatures(sigs);
+        Bribe3074(msg.sender).judge(sig1, sig2);
     }
 }
 
@@ -129,7 +148,7 @@ contract Bribe3074Test is DSTest {
 
     function unlock() private {
         VM.prank(ORIGIN, ORIGIN);
-        bribe.release(SIG_1, SIG_2, setSender, hex"");
+        bribe.release(setSender, abi.encodePacked(SIG_1, SIG_2));
     }
 
     function testReleaseUnlock() public {
@@ -145,10 +164,10 @@ contract Bribe3074Test is DSTest {
 
         VM.prank(ORIGIN, ORIGIN);
 
-        try bribe.release(SIG_1, SIG_2, leaveSender, hex"") {
+        try bribe.release(leaveSender, abi.encodePacked(SIG_1, SIG_2)) {
             fail();
         } catch Error(string memory reason) {
-            assertEq(reason, Errors.FAILED);
+            assertEq(reason, Errors.INVALID_SIGNATURE);
         }
 
         assertTrue(bribe.locked());
@@ -159,7 +178,7 @@ contract Bribe3074Test is DSTest {
 
         VM.prank(ORIGIN, ORIGIN);
 
-        try bribe.release(SIG_2, SIG_2, setSender, hex"") {
+        try bribe.release(setSender, abi.encodePacked(SIG_2, SIG_2)) {
             fail();
         } catch Error(string memory reason) {
             assertEq(reason, Errors.INVALID_SIGNATURE);
@@ -173,7 +192,7 @@ contract Bribe3074Test is DSTest {
 
         VM.prank(ORIGIN, ORIGIN);
 
-        try bribe.release(SIG_1, SIG_1, setSender, hex"") {
+        try bribe.release(setSender, abi.encodePacked(SIG_1, SIG_1)) {
             fail();
         } catch Error(string memory reason) {
             assertEq(reason, Errors.INVALID_SIGNATURE);
@@ -185,10 +204,11 @@ contract Bribe3074Test is DSTest {
     function testJudge() public {
         assertTrue(bribe.locked());
 
-        try bribe.judge() {
+        VM.prank(SIGNER, ORIGIN);
+        try bribe.judge(SIG_1, SIG_2) {
             fail();
         } catch Error(string memory reason) {
-            assertEq(reason, Errors.FAILED);
+            assertEq(reason, Errors.NOT_ENTERED);
         }
 
         assertTrue(bribe.locked());
@@ -291,7 +311,7 @@ contract Bribe3074Test is DSTest {
         assertEq(tokenA.balanceOf(recpt), 0);
 
         VM.prank(ORIGIN, ORIGIN);
-        bribe.release(SIG_1, SIG_2, setSenderAndClaim, hex"");
+        bribe.release(setSenderAndClaim, abi.encodePacked(SIG_1, SIG_2));
 
         assertEq(tokenA.balanceOf(recpt), 17);
     }
@@ -306,7 +326,7 @@ contract Bribe3074Test is DSTest {
         assertEq(tokenA.balanceOf(recpt), 0);
 
         VM.prank(ORIGIN, ORIGIN);
-        try bribe.release(SIG_1, SIG_2, leaveSenderAndClaim, hex"") {} catch {}
+        try bribe.release(leaveSenderAndClaim, abi.encodePacked(SIG_1, SIG_2)) {} catch {}
 
         assertEq(tokenA.balanceOf(recpt), 0);
     }
@@ -380,7 +400,7 @@ contract Bribe3074Test is DSTest {
         assertEq(tokenA.balanceOf(APPROVEE), 0);
 
         VM.prank(ORIGIN, ORIGIN);
-        bribe.release(SIG_1, SIG_2, setSenderAndApprove, hex"");
+        bribe.release(setSenderAndApprove, abi.encodePacked(SIG_1, SIG_2));
 
         assertEq(tokenA.balanceOf(APPROVEE), 0);
         assertEq(tokenA.allowance(address(bribe), APPROVEE), 17);
@@ -394,7 +414,7 @@ contract Bribe3074Test is DSTest {
         assertEq(tokenA.balanceOf(APPROVEE), 0);
 
         VM.prank(ORIGIN, ORIGIN);
-        try bribe.release(SIG_1, SIG_2, leaveSenderAndApprove, hex"") {} catch {}
+        try bribe.release(leaveSenderAndApprove, abi.encodePacked(SIG_1, SIG_2)) {} catch {}
 
         assertEq(tokenA.balanceOf(APPROVEE), 0);
         assertEq(tokenA.allowance(address(bribe), APPROVEE), 0);

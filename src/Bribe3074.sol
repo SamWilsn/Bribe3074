@@ -16,7 +16,6 @@ library Errors {
     string constant internal NOT_ENTERED = "unentered";
     string constant internal INVALID_DOER = "bad doer";
     string constant internal NOT_JUDGED = "unjudged";
-    string constant internal FAILED = "wen 3074";
     string constant internal LOCKED = "locked";
 }
 
@@ -45,7 +44,7 @@ contract Bribe3074 {
     }
 
     function hashMessage1() private view returns (bytes32) {
-        return keccak256(abi.encodePacked(tx.origin));
+        return keccak256(abi.encodePacked(msg.sender));
     }
 
     function hashMessage2() private view returns (bytes32) {
@@ -63,12 +62,10 @@ contract Bribe3074 {
             ECDSA.toEthSignedMessageHash(messageHash),
             signature
         );
-        require(tx.origin == recovered, Errors.INVALID_SIGNATURE);
+        require(msg.sender == recovered, Errors.INVALID_SIGNATURE);
     }
 
     function release(
-        bytes memory signature1,
-        bytes memory signature2,
         DoTheThing doer,
         bytes memory extraData
     )
@@ -76,11 +73,6 @@ contract Bribe3074 {
     {
         require(State.Locked == sState, Errors.REENTER);    // Prevent unwanted re-entrancy.
         sState = State.Trial;                               // Mark as having entered.
-
-        // Prove `tx.origin` is a normal EOA by having it sign two different
-        // messages.
-        verifySignature(hashMessage1(), signature1);
-        verifySignature(hashMessage2(), signature2);
 
         // Call into an arbitrary contract that does the 3074 magic, and calls
         // back into this contract's `judge`.
@@ -91,13 +83,18 @@ contract Bribe3074 {
         require(State.Unlocked == sState, Errors.NOT_JUDGED);
     }
 
-    function judge() external {
-        // Only possible if 3074 is implemented, or we're in the top level of
-        // execution.
-        require(msg.sender == tx.origin, Errors.FAILED);
+    function judge(
+        bytes memory signature1,
+        bytes memory signature2
+    ) external {
+        // Prove `msg.sender` is a normal EOA by having it sign two different
+        // messages.
+        verifySignature(hashMessage1(), signature1);
+        verifySignature(hashMessage2(), signature2);
 
-        // Require that we've been called earlier in this call stack, excluding
-        // the possibility we're in the top level of execution.
+        // Require that we've been called earlier in this call stack. Together
+        // with the proof above that `msg.sender` is an EOA, this guarantees a
+        // 3074-like EIP has been implemented.
         require(State.Trial == sState, Errors.NOT_ENTERED);
 
         // Unlock claims!
