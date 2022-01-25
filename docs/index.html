@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Bribe3074.sol</title>
+        <link
+            rel="shortcut icon"
+            href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAfhQTFRFAAAA////////////////////////////////////////////////////////////////////////AAAAAQEBAgICAwMDBAQEBQUFBgYGBwcHCAgICQkJCgoKCwsLDQ0NDg4ODw8PEBAQERERFhYWGRkZGhoaGxsbHBwcHR0dICAgISEhIiIiJCQkKysrLCwsLS0tLi4uMDAwMTExMjIyMzMzNTU1NjY2ODg4OTk5Ozs7PDw8Pz8/QkJCRERERUVFR0dHSUlJS0tLTU1NTk5OUVFRVVVVV1dXWFhYWVlZW1tbXV1dY2NjZWVlZmZmaGhoaWlpbGxsbm5ub29vd3d3eXl5enp6fHx8f39/gYGBhISEhoaGh4eHiIiIi4uLjY2Njo6Oj4+Pk5OTl5eXmJiYmZmZmpqanJycnZ2dnp6eo6OjpKSkpaWlp6enqampqqqqq6urrKysrq6ur6+vsLCwsrKyubm5urq6u7u7vb29vr6+v7+/wcHBwsLCw8PDxMTExsbGx8fHycnJysrKzMzMz8/P0NDQ0tLS1NTU1dXV29vb3t7e39/f4eHh4+Pj5OTk5eXl5+fn6Ojo6enp6urq6+vr7Ozs7e3t7u7u8PDw8fHx8vLy8/Pz9PT09fX19vb29/f3+fn5+vr6+/v7/Pz8/f39/v7+////wDSjBQAAABN0Uk5TACwuMFlbXaSlpqfm5+jp+Pn6/qsMj8EAAAIPSURBVDjLdZP5O9RxEMfHSq0r7GxLqxy1opCSdKjtvnUvupNSokKX0oWso1Dp2CLE2n39m/3w+bL22fX+6f2ZeT0z83yeGRFJTEknrtKTbSIiK7NYVplJIolZAGMfnr/7FF6Ij3Z1dgcMYZMUoHO3qqpuagoDdFeqOnXN0VEAu6yGu1rQPM54c55eB7py8lsm+Vanxd+BNHEQ3qKtANzQMgiV6yMAavUc4BCA+XkA7uk26NXCIAC9mh8EJDJy32ZnGzTpDvP8rToUAYaP7yvznOwBrughEwq79fVS4MD2dZVX/0CDHrEq5mlXdIvxM1o1TaPuMs8JVX80wFyBvuCNesyH9WvurAH8RetHAJhxawfBYn0JwGU9jQHCe3XnEPDlmBZNwmMt+QihB9kbRiyAX6fWaklVqUurhwFaNmp5tUcrBmBxhsCTO/W3WgetWSaeXqu7/T7EIjDVH1FoYeIf/f5FoE8jmrLyX0u1MLaCTw9bOxGoyF8CLKgnt/KvcVN73G2xwGdP0ZhxswddHaMxwMxWV7dxoRPO+8QCPm2w3Hm9SSwwkFP6z7h6vUQcoMbaOxr1bDgOMKieWbPyTtd+r9frrdFsr/ctiMMAF7XWmJ8+owvq9vkGcYh1duX6MPqorBZpkgxA0Kmv4gKrxJYJMNfeHogGptufARkJIkmZyx9vxgoREZs9NX461Z4g8h9AJP2YqnNK0gAAAABJRU5ErkJggg==">
+
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/tingle.js@0.16.0/dist/tingle.min.css"
+            integrity="sha384-/kVnO3LDsamewwx73H6Ue8o8MpzF5nlm7nTigNI2EhptocQEItINjvfjCVAvOPDg"
+            crossorigin="anonymous">
+
+        <link
+            rel="preload"
+            crossorigin="anonymous"
+            href="tokens.json"
+            as="fetch">
+
+        <link
+            rel="preload"
+            crossorigin="anonymous"
+            href="Bribe3074.json"
+            as="fetch">
+
+        <link
+            rel="preload"
+            crossorigin="anonymous"
+            href="IERC20Metadata.json"
+            as="fetch">
+
+        <style>
+            /* Based on autoComplete.js, Apache 2 License */
+            .autoComplete_wrapper {
+              display: inline-block;
+              position: relative;
+            }
+
+            input {
+              height: 3rem;
+              width: 26rem;
+              margin: 0;
+              padding: 0 2rem 0 3.2rem;
+              box-sizing: border-box;
+              -moz-box-sizing: border-box;
+              -webkit-box-sizing: border-box;
+              font-size: 1rem;
+              text-overflow: ellipsis;
+              color: rgba(255, 122, 122, 0.3);
+              outline: none;
+              border-radius: 10rem;
+              border: 0.05rem solid rgba(255, 122, 122, 0.5);
+              background-size: 1.4rem;
+              background-position: left 1.05rem top 0.8rem;
+              background-repeat: no-repeat;
+              background-origin: border-box;
+              background-color: #fff;
+              transition: all 0.4s ease;
+              -webkit-transition: all -webkit-transform 0.4s ease;
+            }
+
+            input[type="search"] {
+              background-image: url(./search.svg);
+            }
+
+            input::placeholder {
+              color: rgba(255, 122, 122, 0.5);
+              transition: all 0.3s ease;
+              -webkit-transition: all -webkit-transform 0.3s ease;
+            }
+
+            input:hover::placeholder {
+              color: rgba(255, 122, 122, 0.6);
+              transition: all 0.3s ease;
+              -webkit-transition: all -webkit-transform 0.3s ease;
+            }
+
+            input:focus::placeholder {
+              padding: 0.1rem 0.6rem;
+              font-size: 0.95rem;
+              color: rgba(255, 122, 122, 0.4);
+            }
+
+            input:focus::selection {
+              background-color: rgba(255, 122, 122, 0.15);
+            }
+
+            input::selection {
+              background-color: rgba(255, 122, 122, 0.15);
+            }
+
+            input:hover {
+              color: rgba(255, 122, 122, 0.8);
+              transition: all 0.3s ease;
+              -webkit-transition: all -webkit-transform 0.3s ease;
+            }
+
+            input:focus {
+              color: rgba(255, 122, 122, 1);
+              border: 0.06rem solid rgba(255, 122, 122, 0.8);
+            }
+
+            .autoComplete_wrapper > ul {
+              position: absolute;
+              max-height: 226px;
+              overflow-y: scroll;
+              box-sizing: border-box;
+              left: 0;
+              right: 0;
+              margin: 0.5rem 0 0 0;
+              padding: 0;
+              z-index: 1;
+              list-style: none;
+              border-radius: 0.6rem;
+              background-color: #fff;
+              border: 1px solid rgba(33, 33, 33, 0.07);
+              box-shadow: 0 3px 6px rgba(149, 157, 165, 0.15);
+              outline: none;
+              transition: opacity 0.15s ease-in-out;
+              -moz-transition: opacity 0.15s ease-in-out;
+              -webkit-transition: opacity 0.15s ease-in-out;
+            }
+
+            .autoComplete_wrapper > ul[hidden],
+            .autoComplete_wrapper > ul:empty {
+              display: block;
+              opacity: 0;
+              transform: scale(0);
+            }
+
+            .autoComplete_wrapper > ul > li {
+              margin: 0.3rem;
+              padding: 0.3rem 0.5rem;
+              text-align: left;
+              font-size: 1rem;
+              color: #212121;
+              border-radius: 0.35rem;
+              background-color: rgba(255, 255, 255, 1);
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              transition: all 0.2s ease;
+            }
+
+            .autoComplete_wrapper > ul > li mark {
+              background-color: transparent;
+              color: rgba(255, 122, 122, 1);
+              font-weight: bold;
+            }
+
+            .autoComplete_wrapper > ul > li:hover {
+              cursor: pointer;
+              background-color: rgba(255, 122, 122, 0.15);
+            }
+
+            .autoComplete_wrapper > ul > li[aria-selected="true"] {
+              background-color: rgba(255, 122, 122, 0.15);
+            }
+
+            @media only screen and (max-width: 600px) {
+              input {
+                width: 18rem;
+              }
+            }
+
+        </style>
+
+        <style>
+            /* Back to MPL */
+            body {
+                background: rgba(255,122,122,.8);
+                color: #fff;
+                font-family: sans-serif;
+            }
+
+            h1 {
+                text-transform: lowercase;
+                text-align: center;
+            }
+
+            .tingle-modal {
+                color: #000;
+                text-align: left;
+            }
+
+            #checks {
+                margin-top: 1rem;
+            }
+
+            #checks label {
+                display: flex;
+                align-items: center;
+                margin: 1rem 0;
+            }
+
+            input[type="checkbox"] {
+                width: 8rem;
+                min-width: 8rem;
+            }
+
+            #container {
+                background: white;
+                padding: 2rem;
+                border-radius: 2rem;
+                width: 31rem;
+                color: #000;
+                margin-left: auto;
+                margin-right: auto;
+                transition: all 0.4s ease;
+                -webkit-transition: all -webkit-transform 0.4s ease;
+            }
+
+            .fieldImageWrapper {
+                width: 3rem;
+                height: 3rem;
+                display: inline-block;
+                vertical-align: top;
+                text-align: center;
+            }
+
+            .fieldImageWrapper > img {
+                height: 1.5rem;
+                max-width: 100%;
+                padding: 0.75rem 0;
+                object-fit: contain;
+            }
+
+            input {
+                vertical-align: middle;
+            }
+
+            input[disabled] {
+                cursor: not-allowed;
+            }
+
+            input::-webkit-outer-spin-button,
+            input::-webkit-inner-spin-button {
+              -webkit-appearance: none;
+              margin: 0;
+            }
+
+            /* Firefox */
+            input[type="number"] {
+              -moz-appearance: textfield;
+            }
+
+            input[type="submit"] {
+                padding: 0 2rem;
+                width: 13rem;
+                border: .05rem solid rgba(255,122,122,.8);
+                background: rgba(255,122,122,.8);
+                color: #fff;
+                cursor: pointer;
+            }
+
+            label + * {
+                margin-left: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .tingle-modal label {
+                font-size: large;
+            }
+
+            label {
+                display: block;
+                text-transform: uppercase;
+                font-size: small;
+                font-family: sans-serif;
+                margin: 0.25rem 0;
+                font-weight: 600;
+            }
+
+            .actions {
+                text-align: center;
+            }
+
+            @media only screen and (max-width: 800px) {
+              input[type="checkbox"] {
+                  min-width: 4rem;
+                  width: 4rem;
+                  height: 2rem;
+              }
+            }
+
+            @media only screen and (max-width: 600px) {
+              #container {
+                  width: 23rem;
+              }
+
+              input[type="submit"] {
+                  width: 9rem;
+              }
+            }
+
+        </style>
+    </head>
+    <body>
+        <h1>Love EIP-3074? Bribe Someone!</h1>
+        <div id="container">
+            <form>
+                <div>
+                    <label for="tokenInput">ERC-20 Token</label>
+                    <input
+                        id="tokenInput"
+                        type="search"
+                        minlength="42"
+                        maxlength="42"
+                        required
+                        dir="ltr"
+                        spellcheck=false
+                        autocorrect="off"
+                        autocomplete="off"
+                        autocapitalize="off">
+
+                    <div class="fieldImageWrapper">
+                        <img
+                            id="tokenLogo"
+                            src=""
+                            title=""
+                            alt=""
+                            style="display: none;">
+                    </div>
+                </div>
+                <div>
+                    <label for="recipient">Recipient</label>
+                    <input
+                        id="recipient"
+                        placeholder="0x..."
+                        required
+                        pattern="(0x[a-fA-F0-9]{40})|(.+\..+)"
+                        type="text"
+                        dir="ltr"
+                        spellcheck=false
+                        autocorrect="off"
+                        autocapitalize="off">
+
+                    <div class="fieldImageWrapper">
+                        <img
+                            id="recipientAvatar"
+                            src=""
+                            title=""
+                            alt=""
+                            style="display: none;">
+                    </div>
+                </div>
+                <div>
+                    <label for="amount">Amount</label>
+                    <input
+                        id="amount"
+                        required
+                        placeholder="0.0000"
+                        type="number"
+                        min="0"
+                        step="any"
+                        dir="ltr"
+                        spellcheck=false
+                        autocorrect="off"
+                        autocapitalize="off">
+                </div>
+                <div class="actions">
+                    <input id="bribe" type="submit" disabled value="Bribe!">
+                </div>
+            </div>
+        </form>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.6/dist/autoComplete.min.js"
+            integrity="sha512-AG2WQs9y2lSvn1SmLyCUCjRkALZuH/UDjy22dm4ib9Nr9lT/Sy1tw5WMWq58QicOqaMzpmMYMzKH78QO8Tsbuw=="
+            crossorigin="anonymous"
+            defer></script>
+
+        <script type="text/javascript"
+            integrity="sha384-9YjKsdXMXrDGpJr2BHBh4/Ho+T0N760c/6CNf9rTk8PVPu51rpSgiQONc8II24HF"
+            crossorigin="anonymous"
+            src="https://cdn-cors.ethers.io/lib/ethers-5.5.3.umd.min.js"
+            defer></script>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/tingle.js@0.16.0/dist/tingle.min.js"
+            integrity="sha384-bDRW6S3XNqRo7onSuDQeNrDamw82sOX6MWTnAk2Kz8NypNyZcS7CVLQS3lqVer99"
+            crossorigin="anonymous"
+            defer></script>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/web3modal@1.9.5/dist/index.js"
+            integrity="sha384-JiH6r7PhPnFNqLJfIlcQ9jIepaH/8VAE9T8Ao9iOqhASxc/U5TdP6EcLgMUfDNWG"
+            crossorigin="anonymous"
+            defer></script>
+
+        <script
+            src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.7.1/dist/umd/index.min.js"
+            integrity="sha384-mIRP3HoHa5R5VuxPloQyeQKx/DwRqPec1mTkQP5yMcxtdpmw7x7k+ube+KJ9yTJc"
+            crossorigin="anonymous"
+            defer></script>
+
+        <script async>
+            (() => {
+                "use strict";
+
+                //
+                // API Credentials
+                //
+                const network = "homestead";
+                const infuraId = "7074adf98cbc4afaabda2e09151b8e4b";
+                const etherscanId = "HYND2S92S8FDTGJYQFNCAZBHKFI2R2TSVH";
+                const alchemyId = "lFUJaQ4O4OLdlIVy0MmVWRnjnRiQAVV_";
+                const pocketId = "613357257bad1500343d9ad9";
+
+                //
+                // External Requests
+                //
+                const erc20Abi = fetch("IERC20Metadata.json")
+                    .then(response => response.json());
+
+                const contractAbi = fetch("Bribe3074.json")
+                    .then(response => response.json());
+
+                const tokenList = fetch("tokens.json")
+                    .then(response => response.json());
+
+                const tokenMap = tokenList
+                    .then(data => new Map(data.tokens.map(t => [t.address.toLowerCase(), t])));
+
+                const onLoad = () => {
+                    //
+                    // DOM Elements
+                    //
+                    const bribeButton = document.getElementById("bribe");
+                    const tokenAddressInput = document.getElementById("tokenInput");
+                    const tokenLogoImg = document.getElementById("tokenLogo");
+
+                    const recipientInput = document.getElementById("recipient");
+                    const recipientAvatarImg = document.getElementById("recipientAvatar");
+
+                    const amountInput = document.getElementById("amount");
+
+                    const form = document.forms[0];
+
+                    //
+                    // Ethereum Data Source (Read-Only)
+                    //
+                    const providerRo = ethers.getDefaultProvider(network, {
+                        infura: infuraId,
+                        etherscan: etherscanId,
+                        alchemy: alchemyId,
+                        pocket: pocketId
+                    });
+
+                    const Web3Modal = window.Web3Modal.default;
+                    const providerOptions = {
+                        walletconnect: {
+                            package: WalletConnectProvider.default,
+                            options: {
+                              infuraId: infuraId
+                            }
+                        }
+                    };
+
+                    //
+                    // Utility Functions
+                    //
+                    const reload = () => { location.reload(); };
+
+                    async function getToken(enteredAddress) {
+                        const myTokenMap = await tokenMap;
+                        return myTokenMap.get(enteredAddress.toLowerCase());
+                    }
+
+                    async function waitTx(tx) {
+                        while (true) {
+                            try {
+                                return await tx.wait();
+                            } catch (e) {
+                                if (e.code === ethers.utils.Logger.errors.TRANSACTION_REPLACED && !e.cancelled) {
+                                    tx = e.replacement;
+                                    continue;
+                                }
+                                throw e;
+                            }
+                        }
+                    }
+
+                    async function updateTokenLogo() {
+                        const myToken = await getToken(tokenAddressInput.value);
+
+                        if (myToken) {
+                            tokenLogoImg.src = myToken.logoURI;
+                            tokenLogoImg.title = `${myToken.name} (${myToken.symbol})`;
+                            tokenLogoImg.alt = tokenLogoImg.title;
+                            tokenLogoImg.style.display = "";
+                        } else {
+                            tokenLogoImg.src = "";
+                            tokenLogoImg.title = "Unknown Token";
+                            tokenLogoImg.alt = "Unknown Token";
+                            tokenLogoImg.style.display = "none";
+                        }
+                    }
+
+                    async function updateRecipientAvatar() {
+                        const enteredAddress = recipientInput.value;
+
+                        // Avoid superfluous queries.
+                        let valid = enteredAddress.startsWith("0x");
+                        valid &= enteredAddress.length === 42;
+                        valid |= enteredAddress.indexOf(".") !== -1;
+
+                        if (valid) {
+                            let domain;
+
+                            try {
+                                const address = ethers.utils.getAddress(enteredAddress);
+                                domain = await providerRo.lookupAddress(address);
+                            } catch (e) {
+                                domain = enteredAddress;
+                            }
+
+                            if (domain) {
+                                try {
+                                    const avatar = providerRo.getAvatar(domain);
+
+                                    recipientAvatar.src = await avatar;
+                                    recipientAvatar.title = `${domain}'s Avatar`;
+                                    recipientAvatar.alt = recipientAvatar.title;
+                                    recipientAvatar.style.display = "";
+                                    return;
+                                } catch (e) {
+                                    console.error("error fetching avatar", e);
+                                }
+                            }
+                        }
+
+                        recipientAvatar.src = "";
+                        recipientAvatar.title = "No Avatar Found";
+                        recipientAvatar.alt = "No Avatar";
+                        recipientAvatar.style.display = "none";
+                    }
+
+                    async function bribe(tokenAddress, recipient, amountTxt, provider) {
+                        const contract = new ethers.Contract(
+                            "0xe55a523a47040c18Ec958298598003B143091B22",
+                            await contractAbi,
+                            provider
+                        );
+
+                        const erc20 = new ethers.Contract(
+                            tokenAddress,
+                            await erc20Abi,
+                            provider
+                        );
+
+                        let decimals = ((await getToken(tokenAddress))?.decimals) ?? 0;
+
+                        try {
+                            decimals = await erc20.decimals();
+                        } catch {
+                        }
+
+                        const amount = ethers.utils.parseUnits(amountTxt, decimals);
+
+                        let currentAddress = await provider.getAddress();
+
+                        const allowance = await erc20.allowance(currentAddress, contract.address);
+
+                        if (allowance.lt(amount)) {
+                            let response = await erc20.approve(contract.address, amount);
+                            await waitTx(response);
+                        }
+
+                        let response = await contract.fund(erc20.address, recipient, amount);
+                        await waitTx(response);
+                        form.reset();
+                    }
+
+                    async function connectWallet(tokenAddress, recipient, amount) {
+                        const web3Modal = new Web3Modal({
+                            network: network === "homestead" ? "mainnet" : network,
+                            cacheProvider: false,
+                            providerOptions
+                        });
+
+                        let modalProvider;
+                        try {
+                            modalProvider = await web3Modal.connect();
+                        } catch (e) {
+                            if (e === "Modal closed by user") {
+                                return;
+                            } else {
+                                throw e;
+                            }
+                        }
+
+                        const web3Provider = new ethers.providers.Web3Provider(modalProvider);
+                        let provider = web3Provider.getSigner();
+
+                        const providerNetwork = await web3Provider.getNetwork();
+
+                        if (providerNetwork.name !== network) {
+                            // Disconnect as well as possible from the provider.
+                            try {
+                                await modalProvider.disconnect();
+                            } catch (e) {
+                                console.log(e);
+
+                                try {
+                                    await modalProvider.request({
+                                        method: "wallet_requestPermissions",
+                                        params: [{eth_accounts: {}}]
+                                    });
+                                } catch (f) {
+                                    console.log(f);
+                                }
+                            }
+
+                            alert(`wrong network: ${providerNetwork.name} is not ${network}`);
+                            provider = null;
+                            return;
+                        }
+
+                        modalProvider.on("accountsChanged", reload);
+                        modalProvider.on("chainChanged", reload);
+                        modalProvider.on("disconnect", reload);
+
+                        bribe(tokenAddress, recipient, amount, provider);
+                    }
+
+                    //
+                    // Setup Functions
+                    //
+                    function setupTokenAutocomplete() {
+                        const tokenComplete = new autoComplete({
+                            selector: () => tokenAddressInput,
+                            placeHolder: "0x...",
+                            data: {
+                                src: async (query) => (await tokenList).tokens,
+                                keys: ["address", "name", "symbol"]
+                            },
+                            events: {
+                                input: {
+                                    selection: (event) => {
+                                        const selection = event.detail.selection.value;
+                                        tokenComplete.input.value = selection.address;
+                                        updateTokenLogo();
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    function setupInput(element, handler) {
+                        let timeout = null;
+                        element.addEventListener("input", () => {
+                            if (null !== timeout) {
+                                clearTimeout(timeout);
+                                timeout = null;
+                            }
+                            timeout = setTimeout(handler, 500);
+                        });
+                    }
+
+                    function setupForm() {
+                        const modal = new tingle.modal({
+                            footer: true,
+                        });
+
+                        modal.setContent(`
+                            I understand and agree that:
+                            <form id="checks">
+                                <label>
+                                    <input type="checkbox" required>
+                                    <div>This is not a serious project.</div>
+                                </label>
+                                <label>
+                                    <input type="checkbox" required>
+                                    <div>The code is poorly tested and not audited.</div>
+                                </label>
+                                <label>
+                                    <input type="checkbox" required>
+                                    <div>EIP-3074 may <em>never</em> get implemented, and any bribes might be locked forever.</div>
+                                </label>
+                                <label>
+                                    <input type="checkbox" required>
+                                    <div>EIP-3074 may be implemented <em>differently</em>, and any bribes might be locked forever.</div>
+                                </label>
+                                <label>
+                                    <input type="checkbox" required>
+                                    <div>Any bribes might be locked forever, even if everything else goes as expected.</div>
+                                </label>
+                                <label>
+                                    <input type="checkbox" required>
+                                    <div>I am liable for any actions I take with Bribe3074 (not its developers) and assume all associated risks.</div>
+                                </label>
+                            </form>
+                        `);
+
+                        modal.addFooterBtn(
+                            "Connect Wallet",
+                            "tingle-btn tingle-btn--primary",
+                            async () => {
+                                const checks = document.getElementById("checks");
+                                if (checks.reportValidity()) {
+                                    const token = tokenAddressInput.value;
+                                    const recipient = recipientInput.value;
+                                    const amount = amountInput.value;
+
+                                    checks.reset();
+                                    modal.close();
+
+                                    await connectWallet(token, recipient, amount);
+                                }
+                            }
+                        );
+
+                        form.addEventListener("submit", (event) => {
+                            event.preventDefault();
+                            modal.open();
+                        });
+
+                        bribeButton.removeAttribute("disabled");
+                    }
+
+                    function setup() {
+                        setupTokenAutocomplete();
+                        setupInput(tokenAddressInput, updateTokenLogo);
+                        setupInput(recipientInput, updateRecipientAvatar);
+                        setupForm();
+
+                        // Just in case there are old values left over.
+                        updateRecipientAvatar();
+                        updateTokenLogo();
+                    }
+
+                    setup();
+                };
+
+                document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", onLoad) : onLoad();
+            })();
+        </script>
+    </body>
+</html>
