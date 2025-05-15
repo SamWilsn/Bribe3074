@@ -1,3 +1,0 @@
-ds-test=lib/ds-test/src
-@openzeppelin=lib/openzeppelin-contracts/
-@std=lib/forge-std/src/

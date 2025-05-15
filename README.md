@@ -1,20 +1,10 @@
 Bribe3074
 =========
 
-An Ethereum contract to collect bribes for implementing [EIP-3074].
+[EIP-7702] has landed on mainnet, bringing rich execution to externally owned
+accounts. Thanks for playing!
 
-## Development
+See [`08d3db3b4`] for the final release of this repository.
 
-`Bribe3074` is developed using [Foundry].
-
-Once you have Foundry installed, to run the unit tests:
-
-```bash
-$ forge test
-```
-
-Don't forget to `git submodule update --init --recursive`!
-
-
-[EIP-3074]: https://eips.ethereum.org/EIPS/eip-3074
-[Foundry]: https://github.com/gakonst/foundry
+[`08d3db3b4`]: https://github.com/SamWilsn/Bribe3074/tree/08d3db3b445c6ad30a86f875eeaf8efd8d493754
+[EIP-7702]: https://eips.ethereum.org/EIPS/eip-7702
